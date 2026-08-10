@@ -11,7 +11,7 @@
       art: './assets/card-front-ak.svg',
       gun: './assets/ak-1.png',
       rarity: 'Classified',
-      fan: { x: -260, y: 20, r: -12 }
+      fan: { x: -340, y: 20, r: -12 }
     },
     {
       weaponKey: 'Desert Eagle | Mecha Industries',
@@ -27,7 +27,7 @@
       art: './assets/card-front-awp.svg',
       gun: './assets/awp-1.png',
       rarity: 'Covert',
-      fan: { x: 260, y: 20, r: 12 },
+      fan: { x: 340, y: 20, r: 12 },
       holo: true
     }
   ];
@@ -85,33 +85,43 @@
 
   booster.addEventListener('click', openBooster);
 
+  const BURN_MS = 450;   // stage A — burn away
+  const STACK_PAUSE_MS = 260; // pause between stack reveal and deal-out
+
   function openBooster() {
     if (state.phase !== 'closed') return;
     state.phase = 'opening';
-    booster.classList.add('bursting');
+    booster.classList.add('burning');
     booster.disabled = true;
 
     setTimeout(() => {
       booster.hidden = true;
-      dealCards();
-      state.phase = 'revealed';
-    }, 360);
+      revealStack();
+    }, BURN_MS);
   }
 
-  function dealCards() {
+  // stage B — cards appear stacked directly on top of each other, face-down, no offset
+  function revealStack() {
     tray.hidden = false;
     CARDS.forEach((card, i) => {
       const slot = buildCardSlot(card, i);
       tray.appendChild(slot);
-      // force layout so the initial (booster-origin) transform is committed
-      // before switching to the fanned-out position, otherwise the browser
-      // coalesces both states and skips the transition.
+      // force layout so the initial (pre-stack) transform is committed before
+      // switching to the stacked state, otherwise the browser coalesces both
+      // states and skips the transition.
       // eslint-disable-next-line no-unused-expressions
       slot.getBoundingClientRect();
       requestAnimationFrame(() => {
-        requestAnimationFrame(() => slot.classList.add('dealt'));
+        requestAnimationFrame(() => slot.classList.add('stacked'));
       });
     });
+    setTimeout(fanOut, STACK_PAUSE_MS);
+  }
+
+  // stage C — deal out to fanned positions, staggered
+  function fanOut() {
+    tray.querySelectorAll('.card-slot').forEach((slot) => slot.classList.add('dealt'));
+    state.phase = 'revealed';
   }
 
   function buildCardSlot(card, index) {
@@ -131,7 +141,7 @@
     const flipInner = document.createElement('div');
     flipInner.className = 'flip-inner';
 
-    const back = buildBackFace();
+    const back = buildBackFace(rarityColor);
     const front = buildFrontFace(card);
 
     flipInner.appendChild(back);
@@ -150,9 +160,54 @@
     slot.classList.add('flipped');
   }
 
-  function buildBackFace() {
+  function buildBackFace(rarityColor) {
     const back = document.createElement('div');
     back.className = 'card-face back';
+
+    const backTiltPerspective = document.createElement('div');
+    backTiltPerspective.className = 'back-tilt-perspective';
+
+    const backTiltInner = document.createElement('div');
+    backTiltInner.className = 'back-tilt-inner';
+
+    backTiltPerspective.appendChild(backTiltInner);
+    back.appendChild(backTiltPerspective);
+
+    // ---- mouse-tracking tilt + glow, ported from the front-card mechanism ----
+    const tiltStrength = 10;
+    let hover = false;
+    let rx = 0, ry = 0;
+
+    backTiltPerspective.addEventListener('pointermove', (e) => {
+      const rect = backTiltPerspective.getBoundingClientRect();
+      const px = (e.clientX - rect.left) / rect.width;
+      const py = (e.clientY - rect.top) / rect.height;
+      ry = (px - 0.5) * tiltStrength;
+      rx = (0.5 - py) * tiltStrength;
+      hover = true;
+      applyBackTilt();
+    });
+    backTiltPerspective.addEventListener('pointerenter', () => {
+      hover = true;
+      applyBackTilt();
+    });
+    backTiltPerspective.addEventListener('pointerleave', () => {
+      hover = false;
+      rx = 0;
+      ry = 0;
+      applyBackTilt();
+    });
+
+    function applyBackTilt() {
+      const scale = hover ? 1.045 : 1;
+      const lift = hover ? -8 : 0;
+      backTiltInner.style.transform =
+        `translateY(${lift}px) rotateX(${rx.toFixed(2)}deg) rotateY(${ry.toFixed(2)}deg) scale(${scale})`;
+      backTiltInner.style.boxShadow = hover
+        ? `0 0 0 2px ${rarityColor}, 0 0 40px 8px color-mix(in srgb, ${rarityColor} 70%, transparent), 0 22px 32px rgba(0, 0, 0, 0.45)`
+        : '0 0 0 2px transparent, 0 0 0 0 transparent, 0 0 0 rgba(0, 0, 0, 0)';
+    }
+
     return back;
   }
 
