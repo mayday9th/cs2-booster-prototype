@@ -19,7 +19,11 @@
       "Bash(qlmanage -t -s 500 -o /tmp/cs2extract assets/card-front-ak.svg)",
       "Bash(curl -sL -o node37-7.png \"https://www.figma.com/api/mcp/asset/563a1ffc-ea5f-4cdb-998c-3881bfde5b8b.png\")",
       "Bash(cp /tmp/cs2extract/assets/card-mask.png assets/card-mask.png)",
-      "Bash(rm -f assets/ak-2.png assets/ak-3.png assets/de-2.png assets/de-3.png assets/awp-2.png assets/awp-3.png assets/card-mask-ak.png assets/card-mask-de.png assets/card-mask-awp.png)"
+      "Bash(rm -f assets/ak-2.png assets/ak-3.png assets/de-2.png assets/de-3.png assets/awp-2.png assets/awp-3.png assets/card-mask-ak.png assets/card-mask-de.png assets/card-mask-awp.png)",
+      "Bash(git remote *)",
+      "Bash(git branch *)",
+      "Bash(git push *)",
+      "Bash(gh auth *)"
     ]
   }
 }
