@@ -11,7 +11,7 @@
       art: './assets/card-front-ak.svg',
       gun: './assets/ak-1.png',
       rarity: 'Classified',
-      fan: { x: -340, y: 20, r: -12 }
+      fan: { x: -448, y: 0, r: 0 }
     },
     {
       weaponKey: 'Desert Eagle | Mecha Industries',
@@ -27,7 +27,7 @@
       art: './assets/card-front-awp.svg',
       gun: './assets/awp-1.png',
       rarity: 'Covert',
-      fan: { x: 340, y: 20, r: 12 },
+      fan: { x: 448, y: 0, r: 0 },
       holo: true
     }
   ];
@@ -118,7 +118,7 @@
     setTimeout(fanOut, STACK_PAUSE_MS);
   }
 
-  // stage C — deal out to fanned positions, staggered
+  // stage C — deal out to row positions, staggered
   function fanOut() {
     tray.querySelectorAll('.card-slot').forEach((slot) => slot.classList.add('dealt'));
     state.phase = 'revealed';
