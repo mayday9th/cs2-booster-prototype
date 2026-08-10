@@ -50,7 +50,20 @@
       "Bash(python3)",
       "Bash(mkdir -p rasters)",
       "Bash(qlmanage -t -s 960 -o rasters \"/Users/ivangannoshyn/New project/assets/card-front-ak.svg\" \"/Users/ivangannoshyn/New project/assets/card-front-de.svg\" \"/Users/ivangannoshyn/New project/assets/card-front-awp.svg\")",
-      "Bash(git add *)"
+      "Bash(git add *)",
+      "Bash(git pull *)",
+      "Bash(git stash *)",
+      "Bash(python3 -c \"import json; json.load\\(open\\('.claude/settings.local.json'\\)\\)\")",
+      "Bash(node -e \"JSON.parse\\(require\\('fs'\\).readFileSync\\('.claude/settings.local.json','utf8'\\)\\)\")",
+      "Bash(py --version)",
+      "Bash(awk '{ print NR\": \"length\\($0\\) }' \"assets/card-front-ak.svg\")",
+      "Bash(sort -t: -k2 -n -r)",
+      "Bash(awk 'NR==218{print \"218:\"length\\($0\\)} NR==219{print \"219:\"length\\($0\\)}' \"assets/card-front-ak.svg\")",
+      "Bash(awk 'NR==218' \"assets/card-front-ak.svg\")",
+      "Bash(awk 'NR==219' \"assets/card-front-ak.svg\")",
+      "Bash(git restore *)",
+      "Bash(git commit *)",
+      "Bash(git commit -m ' *)"
     ]
   }
 }
