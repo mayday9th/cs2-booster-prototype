@@ -1,0 +1,25 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(echo \"--- Downloads for cs2/card related ---\"; find ~/Downloads -maxdepth 2 -iname \"*card*\" -o -iname \"*cs2*\" -o -iname \"*booster*\" 2>/dev/null | head -50 *)",
+      "Bash(cd /tmp/cs2extract && head -c 3000 assets/card-back.svg; echo; echo \"...\"; wc -c assets/card-back.svg)",
+      "Bash(python3 -c ' *)",
+      "Bash(mkdir -p assets)",
+      "Bash(cp /tmp/cs2extract/assets/card-front-ak.svg /tmp/cs2extract/assets/card-front-de.svg /tmp/cs2extract/assets/card-front-awp.svg /tmp/cs2extract/assets/card-mask-ak.png /tmp/cs2extract/assets/card-mask-de.png /tmp/cs2extract/assets/card-mask-awp.png /tmp/cs2extract/assets/badge-blur-ak.png /tmp/cs2extract/assets/badge-blur-de.png /tmp/cs2extract/assets/badge-blur-awp.png /tmp/cs2extract/assets/subtitle-blur-ak.png /tmp/cs2extract/assets/subtitle-blur-de.png /tmp/cs2extract/assets/subtitle-blur-awp.png /tmp/cs2extract/assets/ak-1.png /tmp/cs2extract/assets/ak-2.png /tmp/cs2extract/assets/ak-3.png /tmp/cs2extract/assets/de-1.png /tmp/cs2extract/assets/de-2.png /tmp/cs2extract/assets/de-3.png /tmp/cs2extract/assets/awp-1.png /tmp/cs2extract/assets/awp-2.png /tmp/cs2extract/assets/awp-3.png /tmp/cs2extract/assets/qr-code.png assets/)",
+      "mcp__5af9dd0e-8846-4743-bcf7-d67c4bc92eb2__get_design_context",
+      "mcp__5af9dd0e-8846-4743-bcf7-d67c4bc92eb2__get_metadata",
+      "mcp__5af9dd0e-8846-4743-bcf7-d67c4bc92eb2__download_assets",
+      "Bash(curl -sL -o back-purple.svg \"https://www.figma.com/api/mcp/asset/6cef0639-be79-4e21-9e1c-0b6c806c653e.svg\")",
+      "Bash(curl -sL -o back-red.svg \"https://www.figma.com/api/mcp/asset/50b10a54-5f22-4dcb-830d-db2f1c092c05.svg\")",
+      "Bash(python3 -c \"import cairosvg\")",
+      "Bash(qlmanage -t -s 400 -o . card-back-clean.svg)",
+      "Bash(cp /tmp/cs2extract/card-back-clean.svg \"/Users/ivangannoshyn/New project/assets/card-back.svg\" *)",
+      "mcp__5af9dd0e-8846-4743-bcf7-d67c4bc92eb2__get_screenshot",
+      "Bash(curl -sL -o node8-14.png \"https://www.figma.com/api/mcp/asset/8b13b99f-789e-45a7-abb5-0d9b0cdbaaad.png\")",
+      "Bash(qlmanage -t -s 500 -o /tmp/cs2extract assets/card-front-ak.svg)",
+      "Bash(curl -sL -o node37-7.png \"https://www.figma.com/api/mcp/asset/563a1ffc-ea5f-4cdb-998c-3881bfde5b8b.png\")",
+      "Bash(cp /tmp/cs2extract/assets/card-mask.png assets/card-mask.png)",
+      "Bash(rm -f assets/ak-2.png assets/ak-3.png assets/de-2.png assets/de-3.png assets/awp-2.png assets/awp-3.png assets/card-mask-ak.png assets/card-mask-de.png assets/card-mask-awp.png)"
+    ]
+  }
+}
