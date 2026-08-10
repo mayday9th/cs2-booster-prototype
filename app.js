@@ -172,16 +172,6 @@
     art.style.backgroundImage = `url('${card.art}')`;
     tiltInner.appendChild(art);
 
-    const badgeOcclude = document.createElement('div');
-    badgeOcclude.className = 'tilt-layer occlude-layer badge-occlude';
-    badgeOcclude.style.backgroundImage = `url('./assets/badge-blur-${card.fileKey}.png')`;
-    tiltInner.appendChild(badgeOcclude);
-
-    const subtitleOcclude = document.createElement('div');
-    subtitleOcclude.className = 'tilt-layer occlude-layer subtitle-occlude';
-    subtitleOcclude.style.backgroundImage = `url('./assets/subtitle-blur-${card.fileKey}.png')`;
-    tiltInner.appendChild(subtitleOcclude);
-
     let holoFoil = null, holoSparkle = null;
     if (card.holo) {
       holoFoil = document.createElement('div');

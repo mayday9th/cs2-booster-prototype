@@ -182,28 +182,6 @@ html, body {
   transform: translateZ(0px);
 }
 
-.occlude-layer {
-  transform: translateZ(2px);
-  background-size: 100% 100%;
-  overflow: hidden;
-}
-
-.badge-occlude {
-  position: absolute;
-  top: 19px;
-  right: 5px;
-  width: 185px;
-  height: 54px;
-}
-
-.subtitle-occlude {
-  position: absolute;
-  left: 5%;
-  top: 84.5%;
-  width: 62%;
-  height: 4.2%;
-}
-
 .weapon-slot {
   position: absolute;
   left: 7.44%;
@@ -249,7 +227,9 @@ html, body {
 .badge-text {
   position: absolute;
   top: 19px;
-  right: 19px;
+  right: 5px;
+  min-width: 200px;
+  box-sizing: border-box;
   padding: 8px 9.5px;
   color: #fff;
   font-weight: 700;
@@ -264,14 +244,19 @@ html, body {
 
 .subtitle-text {
   position: absolute;
-  left: 6.2%;
-  top: 85%;
+  left: 4%;
+  right: 4%;
+  top: 84.3%;
+  box-sizing: border-box;
+  padding: 4px 0 4px 1.2%;
   font-weight: 700;
   font-size: 15px;
   letter-spacing: 0.5px;
   text-transform: uppercase;
   transform: translateZ(20px);
   color: var(--rarity-color);
+  background: #0e0812;
+  border-radius: 4px;
 }
 
 .qr-chip {
