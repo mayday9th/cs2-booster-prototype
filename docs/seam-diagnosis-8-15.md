@@ -35,7 +35,15 @@ Via `get_metadata` (raw geometry, relative to the `8:15` frame):
 
 Root frame (`Card_Front AK` / `8:15`) also carries `bg-[#c92adb]` **and**
 `border-4 border-[#c92adb]` per `get_design_context` — a redundant same-color
-stroke the committed SVG doesn't have.
+stroke.
+
+> **Correction (Step 2):** the line above originally said the committed SVG
+> was missing this stroke. That was wrong — a stricter re-check (grepping for
+> `stroke`, which this pass's grep for structural tags didn't include) found
+> it: `<rect x="2" y="2" width="332" height="476" rx="14" stroke="#C92ADB"
+> stroke-width="4">`. The committed SVG does carry the border. See
+> [`docs/card-reexport-differences.md`](card-reexport-differences.md) for the
+> full 3-card comparison.
 
 ## Root causes of the seam
 
