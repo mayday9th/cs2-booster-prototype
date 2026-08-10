@@ -198,14 +198,16 @@
       applyBackTilt();
     });
 
+    const INSET_BEVEL = 'inset 2px 2px 4px 0px rgba(255, 255, 255, 0.1), inset 4px 4px 8px 0px rgba(0, 0, 0, 0.6)';
+
     function applyBackTilt() {
       const scale = hover ? 1.045 : 1;
       const lift = hover ? -8 : 0;
       backTiltInner.style.transform =
         `translateY(${lift}px) rotateX(${rx.toFixed(2)}deg) rotateY(${ry.toFixed(2)}deg) scale(${scale})`;
       backTiltInner.style.boxShadow = hover
-        ? `0 0 0 2px ${rarityColor}, 0 0 40px 8px color-mix(in srgb, ${rarityColor} 70%, transparent), 0 22px 32px rgba(0, 0, 0, 0.45)`
-        : '0 0 0 2px transparent, 0 0 0 0 transparent, 0 0 0 rgba(0, 0, 0, 0)';
+        ? `0 0 0 2px ${rarityColor}, 0 0 40px 8px color-mix(in srgb, ${rarityColor} 70%, transparent), 0 22px 32px rgba(0, 0, 0, 0.45), ${INSET_BEVEL}`
+        : `0 0 0 2px transparent, 0 0 0 0 transparent, 0 0 0 rgba(0, 0, 0, 0), ${INSET_BEVEL}`;
     }
 
     return back;
