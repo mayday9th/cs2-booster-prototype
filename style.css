@@ -179,6 +179,23 @@ html, body {
   transition: transform 230ms ease-out, box-shadow 230ms ease-out;
 }
 
+/* mix-blend-mode does not reliably composite inside an SVG that's referenced
+   as an external CSS background-image in this rendering pipeline (confirmed
+   via a clean external-server test, not just the sandboxed preview) — so the
+   shared crack-texture sheet is applied as its own real DOM layer instead,
+   the same working pattern already used by .holo-layer on the front face. */
+.back-texture-layer {
+  position: absolute;
+  inset: 0;
+  border-radius: 18px;
+  background-image: url('./assets/card-front-ak-texture.jpg');
+  background-size: 295.238% 100%;
+  background-position: center center;
+  background-repeat: no-repeat;
+  mix-blend-mode: screen;
+  pointer-events: none;
+}
+
 /* ---------- front face (ported tilt component) ---------- */
 
 .card-face.front {

@@ -170,6 +170,10 @@
     const backTiltInner = document.createElement('div');
     backTiltInner.className = 'back-tilt-inner';
 
+    const backTexture = document.createElement('div');
+    backTexture.className = 'back-texture-layer';
+    backTiltInner.appendChild(backTexture);
+
     backTiltPerspective.appendChild(backTiltInner);
     back.appendChild(backTiltPerspective);
 
