@@ -7,32 +7,59 @@
   const CARDS = [
     {
       weaponKey: 'AK-47 | Ice Coaled',
+      title: 'AK-47',
+      skinName: 'Ice Coaled',
       fileKey: 'ak',
       art: './assets/card-front-ak.svg',
       gun: './assets/ak-1.png',
       rarity: 'Classified',
-      fan: { x: -448, y: 0, r: 0 }
+      fan: { x: -448, y: 0, r: 0 },
+      bgLayers: './assets/card-front-ak-bg-layers.svg',
+      texture: './assets/card-front-ak-texture.jpg',
+      qr: './assets/card-front-ak-qr.png'
     },
     {
       weaponKey: 'Desert Eagle | Mecha Industries',
+      title: 'Desert Eagle',
+      skinName: 'Mecha Industries',
       fileKey: 'de',
       art: './assets/card-front-de.svg',
       gun: './assets/de-1.png',
       rarity: 'Classified',
-      fan: { x: 0, y: 0, r: 0 }
+      fan: { x: 0, y: 0, r: 0 },
+      bgLayers: './assets/card-front-de-bg-layers.svg',
+      texture: './assets/card-front-de-texture.jpg',
+      qr: './assets/card-front-de-qr.png'
     },
     {
       weaponKey: 'AWP | Printstream',
+      title: 'AWP',
+      skinName: 'Printstream',
       fileKey: 'awp',
       art: './assets/card-front-awp.svg',
       gun: './assets/awp-1.png',
       rarity: 'Covert',
       fan: { x: 448, y: 0, r: 0 },
-      holo: true
+      holo: true,
+      bgLayers: './assets/card-front-awp-bg-layers.svg',
+      texture: './assets/card-front-awp-texture.jpg',
+      qr: './assets/card-front-awp-qr.png'
     }
   ];
 
   const QUALITY = 'Factory New';
+  const SUBLABEL = 'Restricted Claim';
+
+  // Figma's stacked-back reference (node 81:460) offsets each card by
+  // (0,8) / (4,4) / (8,0) in its native 336-wide canvas — a diagonal peek,
+  // not a dead-center overlap. Scaled by the same 400/336 factor used for
+  // the card size, then re-centered on the group's own centroid so the
+  // stack still sits exactly where the booster was, just staggered.
+  const STACK_OFFSETS = [
+    { x: -4.8, y: 4.8 },
+    { x: 0, y: 0 },
+    { x: 4.8, y: -4.8 }
+  ];
 
   // ---- ported from the existing interactive front-card component ----
   function hexToHsl(hex) {
@@ -83,10 +110,22 @@
   const booster = document.getElementById('booster');
   const tray = document.getElementById('tray');
 
+  // cards are built and stacked immediately — they're physically in place
+  // under the booster (DOM order + no z-index puts the booster on top,
+  // and the booster's own footprint fully covers the stack) from the
+  // start, not animated in after the booster disappears.
+  buildStack();
+
   booster.addEventListener('click', openBooster);
 
-  const BURN_MS = 450;   // stage A — burn away
-  const STACK_PAUSE_MS = 260; // pause between stack reveal and deal-out
+  const BURN_MS = 1900;   // stage A — burn away (matches the SVG burn animations' dur)
+  const STACK_PAUSE_MS = 760; // pause between stack reveal and deal-out
+
+  // the organic dissolve is authored as SMIL <animate> elements with
+  // begin="indefinite" (see index.html) so it can be started exactly on
+  // click rather than on page load; all three share the same duration and
+  // easing so the erosion mask and its glowing ring stay in lockstep.
+  const BURN_ANIM_IDS = ['burnAnimMain', 'burnAnimRingA', 'burnAnimRingB'];
 
   function openBooster() {
     if (state.phase !== 'closed') return;
@@ -94,28 +133,25 @@
     booster.classList.add('burning');
     booster.disabled = true;
 
+    BURN_ANIM_IDS.forEach((id) => {
+      const anim = document.getElementById(id);
+      if (anim && typeof anim.beginElement === 'function') anim.beginElement();
+    });
+
     setTimeout(() => {
       booster.hidden = true;
-      revealStack();
+      setTimeout(fanOut, STACK_PAUSE_MS);
     }, BURN_MS);
   }
 
-  // stage B — cards appear stacked directly on top of each other, face-down, no offset
-  function revealStack() {
-    tray.hidden = false;
+  // stage B — cards already sit stacked face-down, offset diagonally per
+  // the Figma reference, ready to be revealed once the booster is gone.
+  function buildStack() {
     CARDS.forEach((card, i) => {
       const slot = buildCardSlot(card, i);
+      slot.classList.add('stacked');
       tray.appendChild(slot);
-      // force layout so the initial (pre-stack) transform is committed before
-      // switching to the stacked state, otherwise the browser coalesces both
-      // states and skips the transition.
-      // eslint-disable-next-line no-unused-expressions
-      slot.getBoundingClientRect();
-      requestAnimationFrame(() => {
-        requestAnimationFrame(() => slot.classList.add('stacked'));
-      });
     });
-    setTimeout(fanOut, STACK_PAUSE_MS);
   }
 
   // stage C — deal out to row positions, staggered
@@ -130,6 +166,8 @@
     const slot = document.createElement('div');
     slot.className = 'card-slot';
     slot.style.setProperty('--rarity-color', rarityColor);
+    slot.style.setProperty('--stack-x', STACK_OFFSETS[index].x + 'px');
+    slot.style.setProperty('--stack-y', STACK_OFFSETS[index].y + 'px');
     slot.style.setProperty('--fan-x', card.fan.x + 'px');
     slot.style.setProperty('--fan-y', card.fan.y + 'px');
     slot.style.setProperty('--fan-r', card.fan.r + 'deg');
@@ -141,7 +179,7 @@
     const flipInner = document.createElement('div');
     flipInner.className = 'flip-inner';
 
-    const back = buildBackFace(rarityColor);
+    const { el: back, triggerExplosion } = buildBackFace(rarityColor, card.holo);
     const front = buildFrontFace(card);
 
     flipInner.appendChild(back);
@@ -149,7 +187,12 @@
     flipPerspective.appendChild(flipInner);
     slot.appendChild(flipPerspective);
 
-    flipInner.addEventListener('click', () => flipCard(index, slot));
+    flipInner.addEventListener('click', () => {
+      // fires immediately on click, not synced to the flip's own rotation —
+      // the burst is the reaction to the click itself, per the reference
+      if (card.holo) triggerExplosion();
+      flipCard(index, slot);
+    });
 
     return slot;
   }
@@ -160,7 +203,7 @@
     slot.classList.add('flipped');
   }
 
-  function buildBackFace(rarityColor) {
+  function buildBackFace(rarityColor, isRare) {
     const back = document.createElement('div');
     back.className = 'card-face back';
 
@@ -170,9 +213,27 @@
     const backTiltInner = document.createElement('div');
     backTiltInner.className = 'back-tilt-inner';
 
+    // rare-only: iridescent aura behind the card, brightened on hover via
+    // pure CSS (:hover), sits in the non-tilting perspective layer so it
+    // reads as an ambient glow rather than tracking the tilt itself
+    let shimmerLayer = null;
+    if (isRare) {
+      shimmerLayer = document.createElement('div');
+      shimmerLayer.className = 'back-shimmer-layer';
+      backTiltPerspective.appendChild(shimmerLayer);
+    }
+
     const backTexture = document.createElement('div');
     backTexture.className = 'back-texture-layer';
     backTiltInner.appendChild(backTexture);
+
+    // rare-only: one-shot bright burst, triggered from app.js on click
+    let explosionLayer = null;
+    if (isRare) {
+      explosionLayer = document.createElement('div');
+      explosionLayer.className = 'back-explosion-layer';
+      backTiltInner.appendChild(explosionLayer);
+    }
 
     backTiltPerspective.appendChild(backTiltInner);
     back.appendChild(backTiltPerspective);
@@ -214,7 +275,15 @@
         : `0 0 0 2px transparent, 0 0 0 0 transparent, 0 0 0 rgba(0, 0, 0, 0), ${INSET_BEVEL}`;
     }
 
-    return back;
+    function triggerExplosion() {
+      if (!explosionLayer) return;
+      explosionLayer.classList.remove('exploding');
+      // eslint-disable-next-line no-unused-expressions
+      explosionLayer.getBoundingClientRect(); // force reflow so re-adding the class restarts the animation
+      explosionLayer.classList.add('exploding');
+    }
+
+    return { el: back, triggerExplosion };
   }
 
   function buildFrontFace(card) {
@@ -228,6 +297,24 @@
     tiltInner.className = 'tilt-inner';
 
     // depth ladder — DOM order matches ascending translateZ, no z-index anywhere
+    const artBase = document.createElement('div');
+    artBase.className = 'tilt-layer art-base-layer';
+    tiltInner.appendChild(artBase);
+
+    if (card.bgLayers) {
+      const bgLayers = document.createElement('div');
+      bgLayers.className = 'tilt-layer bg-layers-layer';
+      bgLayers.style.backgroundImage = `url('${card.bgLayers}')`;
+      tiltInner.appendChild(bgLayers);
+    }
+
+    if (card.texture) {
+      const texture = document.createElement('div');
+      texture.className = 'tilt-layer front-texture-layer';
+      texture.style.backgroundImage = `url('${card.texture}')`;
+      tiltInner.appendChild(texture);
+    }
+
     const art = document.createElement('div');
     art.className = 'tilt-layer art-layer';
     art.style.backgroundImage = `url('${card.art}')`;
@@ -253,6 +340,16 @@
     weaponSlot.appendChild(gunImg);
     tiltInner.appendChild(weaponSlot);
 
+    const titleText = document.createElement('div');
+    titleText.className = 'title-text';
+    titleText.textContent = card.title;
+    tiltInner.appendChild(titleText);
+
+    const skinNameText = document.createElement('div');
+    skinNameText.className = 'skin-name-text';
+    skinNameText.textContent = card.skinName;
+    tiltInner.appendChild(skinNameText);
+
     const badgeText = document.createElement('div');
     badgeText.className = 'badge-text';
     badgeText.textContent = card.rarity;
@@ -263,10 +360,15 @@
     subtitleText.textContent = QUALITY;
     tiltInner.appendChild(subtitleText);
 
+    const sublabelText = document.createElement('div');
+    sublabelText.className = 'sublabel-text';
+    sublabelText.textContent = SUBLABEL;
+    tiltInner.appendChild(sublabelText);
+
     const qrChip = document.createElement('div');
     qrChip.className = 'qr-chip';
     const qrImg = document.createElement('img');
-    qrImg.src = './assets/qr-code.png';
+    qrImg.src = card.qr || './assets/qr-code.png';
     qrImg.alt = 'QR';
     qrChip.appendChild(qrImg);
     tiltInner.appendChild(qrChip);
@@ -293,6 +395,9 @@
     tiltPerspective.addEventListener('pointerenter', () => { hover = true; });
     tiltPerspective.addEventListener('pointerleave', () => {
       hover = false;
+      rx = 0;
+      ry = 0;
+      applyTilt();
       if (card.holo) resetHoloIdleTarget();
     });
 
@@ -305,20 +410,18 @@
       tiltInner.style.boxShadow = `${(-ry * 2.4).toFixed(1)}px ${(rx * 2.4 + 18).toFixed(1)}px 46px rgba(0,0,0,${hover ? 0.55 : 0.38})`;
     }
 
-    // idle motion loop, matches the original component's behavior when not hovering
+    // idle holo shimmer only — the card itself now rests flat (rotateX/Y 0)
+    // when not hovering, instead of a perpetual sway, so text stays pixel-
+    // aligned and crisp at rest; tilt only engages (and text tilts with it,
+    // being inside the same preserve-3d layer) during real pointer hover.
     let idleHoloX = 50, idleHoloY = 50;
     const t0 = performance.now();
     (function loop() {
-      if (!hover) {
+      if (!hover && card.holo) {
         const t = (performance.now() - t0) / 1000;
-        rx = Math.sin(t * 0.5) * 2.5;
-        ry = Math.cos(t * 0.35) * 3.5;
-        applyTilt();
-        if (card.holo) {
-          idleHoloX = 50 + Math.sin(t * 0.4) * 6;
-          idleHoloY = 50 + Math.cos(t * 0.3) * 6;
-          setHoloVars(idleHoloX, idleHoloY, 0.22);
-        }
+        idleHoloX = 50 + Math.sin(t * 0.4) * 6;
+        idleHoloY = 50 + Math.cos(t * 0.3) * 6;
+        setHoloVars(idleHoloX, idleHoloY, 0.22);
       }
       requestAnimationFrame(loop);
     })();
@@ -378,7 +481,7 @@
       ov.addEventListener('click', closeQr);
 
       const img = document.createElement('img');
-      img.src = './assets/qr-code.png';
+      img.src = card.qr || './assets/qr-code.png';
       img.alt = 'QR code';
       img.addEventListener('click', (e) => e.stopPropagation());
       ov.appendChild(img);

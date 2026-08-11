@@ -28,59 +28,39 @@ html, body {
 
 .booster {
   position: relative;
-  width: 352px;
-  height: 528px;
+  width: 419px;
+  height: 629px;
   border: none;
   padding: 0;
   background: none;
   cursor: pointer;
-  opacity: 1;
-  transition: opacity 420ms ease-in;
 }
 
 .booster-face {
   position: absolute;
   inset: 0;
+  display: block;
   border-radius: 14px;
-  background-image: url('./assets/booster-pack.png');
-  background-size: 100% 100%;
-  background-repeat: no-repeat;
-  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.55);
-  transition: box-shadow 200ms ease-out, filter 420ms ease-in;
+  overflow: visible;
+  filter: drop-shadow(0 18px 40px rgba(0, 0, 0, 0.55));
+  transition: filter 200ms ease-out;
 }
 
 .booster:hover .booster-face {
-  box-shadow: 0 22px 50px rgba(0, 0, 0, 0.65), 0 0 30px rgba(255, 255, 255, 0.08);
+  filter: drop-shadow(0 22px 50px rgba(0, 0, 0, 0.65)) drop-shadow(0 0 30px rgba(255, 255, 255, 0.08));
 }
 
-.booster-face::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  border-radius: 14px;
-  background: radial-gradient(circle at 50% 65%,
-      rgba(255, 205, 130, 0.95) 0%,
-      rgba(255, 120, 40, 0.75) 30%,
-      rgba(180, 40, 10, 0.45) 55%,
-      rgba(60, 10, 5, 0.15) 75%,
-      transparent 90%);
-  mix-blend-mode: screen;
-  opacity: 0;
-  transition: opacity 180ms ease-out;
-  pointer-events: none;
-}
-
+/* the burn itself is driven by the SVG mask animation (SMIL, triggered from
+   app.js) — this class only stops further clicks and fades the drop-shadow
+   out over the same duration so a rectangular shadow doesn't linger after
+   the art has visibly dissolved away */
 .booster.burning {
-  opacity: 0;
   pointer-events: none;
 }
 
 .booster.burning .booster-face {
-  filter: brightness(1.6) saturate(1.4) blur(1px);
-}
-
-.booster.burning .booster-face::after {
-  opacity: 1;
+  filter: drop-shadow(0 18px 40px rgba(0, 0, 0, 0));
+  transition: filter 1.9s ease-in;
 }
 
 .booster[hidden] { display: none; }
@@ -92,10 +72,6 @@ html, body {
   inset: 0;
 }
 
-.tray[hidden] {
-  display: none;
-}
-
 .card-slot {
   position: absolute;
   left: 50%;
@@ -104,20 +80,25 @@ html, body {
   height: var(--card-h);
   transform: translate(-50%, -50%) scale(0.7);
   opacity: 0;
+  /* no hover/tilt/click/QR interaction until the card has actually dealt
+     out to its final spot — re-enabled only by .dealt below */
+  pointer-events: none;
   transition:
     transform 260ms ease-out,
     opacity 260ms ease-out;
 }
 
-/* stage B — stacked directly on top of each other, face-down, no offset */
+/* stage B — stacked face-down with a slight diagonal peek, matching the
+   Figma stacked-back reference (not a dead-center overlap) */
 .card-slot.stacked {
   opacity: 1;
-  transform: translate(-50%, -50%) rotate(0deg) scale(1);
+  transform: translate(-50%, -50%) translate(var(--stack-x, 0), var(--stack-y, 0)) rotate(0deg) scale(1);
 }
 
 /* stage C — deal out to row positions, staggered */
 .card-slot.dealt {
   opacity: 1;
+  pointer-events: auto;
   transform: translate(-50%, -50%) translate(var(--fan-x, 0), var(--fan-y, 0)) rotate(var(--fan-r, 0deg)) scale(1);
   transition:
     transform 520ms var(--deal-delay, 0ms) cubic-bezier(0.34, 1.56, 0.64, 1),
@@ -196,6 +177,67 @@ html, body {
   pointer-events: none;
 }
 
+/* ---------- rare-card back only (AWP/Covert): iridescent hover shimmer
+   + click explosion, layered on top of the existing rarity-color glow ---------- */
+
+/* fixed-size, non-rotating clip box — a rotating rect's axis-aligned bounding
+   box balloons up to its own diagonal length at 45°/135°/etc (~1.75x here),
+   so the rotation has to happen on an oversized ::before clipped by this
+   wrapper, or the glow briefly reaches the neighboring card each spin. */
+.back-shimmer-layer {
+  position: absolute;
+  inset: -5%;
+  border-radius: 24px;
+  overflow: hidden;
+  filter: blur(9px);
+  opacity: 0;
+  pointer-events: none;
+  mix-blend-mode: screen;
+  transition: opacity 260ms ease-out;
+}
+
+.back-shimmer-layer::before {
+  content: '';
+  position: absolute;
+  inset: -50%;
+  background: conic-gradient(from 0deg,
+    #ff3b30, #ff8a00, #ffd400, #ff2f7e, #ff3b30);
+  animation: shimmerSpin 5s linear infinite;
+}
+
+.back-tilt-perspective:hover .back-shimmer-layer {
+  opacity: 0.6;
+}
+
+@keyframes shimmerSpin {
+  to { transform: rotate(360deg); }
+}
+
+.back-explosion-layer {
+  position: absolute;
+  inset: 0;
+  border-radius: 18px;
+  background: radial-gradient(circle at 50% 50%,
+    rgba(255, 255, 255, 1) 0%,
+    rgba(255, 224, 140, 0.95) 20%,
+    rgba(255, 140, 40, 0.7) 45%,
+    rgba(255, 60, 20, 0.3) 65%,
+    transparent 80%);
+  opacity: 0;
+  pointer-events: none;
+  mix-blend-mode: screen;
+}
+
+.back-explosion-layer.exploding {
+  animation: explosionBurst 700ms ease-out;
+}
+
+@keyframes explosionBurst {
+  0% { opacity: 0; transform: scale(0.6); }
+  15% { opacity: 1; transform: scale(1.2); }
+  100% { opacity: 0; transform: scale(1.7); }
+}
+
 /* ---------- front face (ported tilt component) ---------- */
 
 .card-face.front {
@@ -224,6 +266,28 @@ html, body {
   position: absolute;
   inset: 0;
   pointer-events: none;
+}
+
+.art-base-layer {
+  background: var(--rarity-color);
+  border-radius: 18px;
+}
+
+.bg-layers-layer {
+  background-size: 100% 100%;
+  background-repeat: no-repeat;
+  mix-blend-mode: multiply;
+  border-radius: 18px;
+}
+
+/* same external-SVG mix-blend-mode limitation as .back-texture-layer — the
+   crack-texture sheet is applied as its own real DOM layer per front card. */
+.front-texture-layer {
+  background-size: 295.238% 100%;
+  background-position: center center;
+  background-repeat: no-repeat;
+  mix-blend-mode: screen;
+  border-radius: 18px;
 }
 
 .art-layer {
@@ -274,17 +338,59 @@ html, body {
   background-position: var(--sparkle-pos-x, 50%) var(--sparkle-pos-y, 50%);
 }
 
+/* Font-size/line-height below are exact Figma-native values scaled by
+   400/336 (CSS card width ÷ Figma's native 336px canvas) — not hand-picked —
+   so each line's box height, and therefore the gap to its neighbor, matches
+   Figma's own metrics instead of an approximate ratio. */
+
+.title-text {
+  position: absolute;
+  left: 7.14%;
+  top: 5%;
+  font-weight: 700;
+  font-size: 28.6px;
+  line-height: 28.6px;
+  color: #fff;
+  text-shadow: 0 4px 8px rgba(0, 0, 0, 0.6);
+  white-space: nowrap;
+  transform: translateZ(20px);
+}
+
+.skin-name-text {
+  position: absolute;
+  left: 7.14%;
+  top: 78.33%;
+  font-weight: 700;
+  font-size: 38.1px;
+  line-height: 28.6px;
+  color: #fff;
+  text-shadow: 0 4px 8px rgba(0, 0, 0, 0.6);
+  white-space: nowrap;
+  transform: translateZ(20px);
+}
+
+.sublabel-text {
+  position: absolute;
+  left: 7.14%;
+  top: 92.7%;
+  font-weight: 500;
+  font-size: 11.9px;
+  line-height: 19px;
+  color: #ccc;
+  white-space: nowrap;
+  transform: translateZ(20px);
+}
+
 .badge-text {
   position: absolute;
   top: 14px;
   right: 14px;
-  min-width: 92px;
   box-sizing: border-box;
-  padding: 4px 9px;
+  padding: 0 9.5px;
   color: #fff;
   font-weight: 700;
-  font-size: 14px;
-  line-height: 20px;
+  font-size: 14.3px;
+  line-height: 28.6px;
   text-align: center;
   border-radius: 5px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.45);
@@ -295,19 +401,15 @@ html, body {
 
 .subtitle-text {
   position: absolute;
-  left: 4%;
-  right: 4%;
-  top: 84.3%;
-  box-sizing: border-box;
-  padding: 4px 0 4px 1.2%;
+  left: 7.14%;
+  top: 85%;
   font-weight: 700;
-  font-size: 15px;
+  font-size: 19px;
+  line-height: 19px;
   letter-spacing: 0.5px;
   text-transform: uppercase;
   transform: translateZ(20px);
   color: var(--rarity-color);
-  background: #0e0812;
-  border-radius: 4px;
 }
 
 .qr-chip {

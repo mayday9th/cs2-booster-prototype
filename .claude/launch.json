@@ -3,8 +3,8 @@
   "configurations": [
     {
       "name": "cs2-booster",
-      "runtimeExecutable": "python3",
-      "runtimeArgs": ["-m", "http.server", "4173"],
+      "runtimeExecutable": "powershell.exe",
+      "runtimeArgs": ["-NoProfile", "-ExecutionPolicy", "Bypass", "-File", ".claude/dev-server.ps1", "-Port", "4173"],
       "port": 4173
     }
   ]
