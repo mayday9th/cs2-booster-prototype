@@ -132,7 +132,8 @@
       "Bash(mkdir -p \"/c/Users/GameON/Documents/GitHub/cs2-booster-prototype/assets/tmp-video\" && cp \"/c/Users/GameON/Desktop/Video Project 1.mp4\" \"/c/Users/GameON/Documents/GitHub/cs2-booster-prototype/assets/tmp-video/video.mp4\" && ls -la \"/c/Users/GameON/Documents/GitHub/cs2-booster-prototype/assets/tmp-video/\")",
       "PowerShell(try { [xml]\\(Get-Content \"C:\\\\Users\\\\GameON\\\\Documents\\\\GitHub\\\\cs2-booster-prototype\\\\index.html\" -Raw\\) | Out-Null; Write-Output \"OK valid XML\" } catch { Write-Output \"INVALID: $_\" })",
       "Bash(sed -i 's/dur=\"4s\"/dur=\"1.4s\"/g' index.html)",
-      "Bash(sed -i 's/const BURN_MS = 4000;/const BURN_MS = 1400;/' app.js)"
+      "Bash(sed -i 's/const BURN_MS = 4000;/const BURN_MS = 1400;/' app.js)",
+      "Bash(curl -s \"https://mayday9th.github.io/cs2-booster-prototype/assets/card-front-awp.svg\" -o /tmp/live-awp.svg)"
     ]
   }
 }

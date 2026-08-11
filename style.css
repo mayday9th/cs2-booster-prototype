@@ -164,7 +164,7 @@ html, body {
    as an external CSS background-image in this rendering pipeline (confirmed
    via a clean external-server test, not just the sandboxed preview) — so the
    shared crack-texture sheet is applied as its own real DOM layer instead,
-   the same working pattern already used by .holo-layer on the front face. */
+   the same working pattern used by .front-texture-layer on the front face. */
 .back-texture-layer {
   position: absolute;
   inset: 0;
@@ -312,30 +312,6 @@ html, body {
   background-size: contain;
   background-position: center;
   background-repeat: no-repeat;
-}
-
-.holo-layer {
-  transform: translateZ(14px);
-  mix-blend-mode: color-dodge;
-  mask-repeat: no-repeat;
-  -webkit-mask-repeat: no-repeat;
-  mask-size: 100% 100%;
-  -webkit-mask-size: 100% 100%;
-  mask-image: url('./assets/card-mask.png');
-  -webkit-mask-image: url('./assets/card-mask.png');
-  opacity: var(--effect-opacity, 0.2);
-}
-
-.holo-foil {
-  background-size: 260% 260%;
-  background-position: var(--foil-pos-x, 50%) var(--foil-pos-y, 50%);
-}
-
-.holo-sparkle {
-  background-image: url('./assets/sparkle.png');
-  background-size: 220px 220px;
-  background-repeat: repeat;
-  background-position: var(--sparkle-pos-x, 50%) var(--sparkle-pos-y, 50%);
 }
 
 /* Font-size/line-height below are exact Figma-native values scaled by
